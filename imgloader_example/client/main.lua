@@ -12,7 +12,6 @@
 
       local playerPed = GetPlayerPed(-1)
       local coords    = GetEntityCoords(playerPed)
-      local camRot    = GetGameplayCamRot()
 
       for k,v in pairs(Config.Zones) do
 
