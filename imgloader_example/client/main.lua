@@ -1,4 +1,4 @@
--- AddEventHandler('imgloader:ready', function()
+AddEventHandler('imgloader:ready', function()
 
   Citizen.CreateThread(function()
     
@@ -48,7 +48,7 @@
 
   end)
 
--- end)
+  end)
 
 AddEventHandler('imgloader_example:hasEnteredMarker', function(zone)
   print('Entered ' .. zone)
