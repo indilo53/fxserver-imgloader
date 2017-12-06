@@ -23,19 +23,11 @@ client_scripts {
 
 You can test the example, it is a sample zone manager using imgloader.
 
-```
-API
+### API
 
+```
 LoadImage(name, textureDictionnaryName, imageName)
 UnloadImage(name)
-
-SetImage(name, key, val)
-
-or
-
-SetImage(name, {
-  key1 = val1,
-  key2 = val2,
-})
+SetImage(name, key, val) or SetImage(name, {key1 = val1, key2 = val2,})
 ```
 
