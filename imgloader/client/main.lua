@@ -42,20 +42,11 @@ function LoadImage(name, txd, imagename)
     return false
   end
 
-  if ImageSrcs[name] ~= txd .. '/' .. imagename then
-    
-    PushScaleformMovieFunction(scaleform, 'LOAD_IMAGE')
-    PushScaleformMovieFunctionParameterString(txd)
-    PushScaleformMovieFunctionParameterString(imagename)
-    PopScaleformMovieFunctionVoid()
-
-    ImageSrcs[name] = txd .. '/' .. imagename
-  
-  end
-
   DrawedImages[name] = {
     scaleformId = id,
     scaleform   = scaleform,
+    txd         = txd,
+    name        = imagename,
     x           = 0.0,
     y           = 0.0,
     z           = 0.0,
@@ -133,6 +124,17 @@ Citizen.CreateThread(function()
   while true do
 
     for k,v in pairs(DrawedImages) do
+
+		  if ImageSrcs[k] ~= v.txd .. '/' .. v.name then
+		    
+		    PushScaleformMovieFunction(v.scaleform, 'LOAD_IMAGE')
+		    PushScaleformMovieFunctionParameterString(v.txd)
+		    PushScaleformMovieFunctionParameterString(v.name)
+		    PopScaleformMovieFunctionVoid()
+
+		    ImageSrcs[k] = v.txd .. '/' .. v.name
+		  
+		  end
 
       PushScaleformMovieFunction(v.scaleform, 'SET_ALPHA')
       PushScaleformMovieFunctionParameterFloat(v.alpha)
