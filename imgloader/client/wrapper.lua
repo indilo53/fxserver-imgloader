@@ -1,5 +1,13 @@
 function LoadImage(name, txd, imagename)
-  TriggerEvent('imgloader:loadImage', name, txd, imagename)
+
+	local scaleform = nil
+
+  TriggerEvent('imgloader:loadImage', name, txd, imagename, function(_scaleform)
+  	scaleform = _scaleform
+  end)
+
+  return scaleform
+
 end
 
 function SetImage(name, key, val)

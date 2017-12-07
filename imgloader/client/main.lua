@@ -106,7 +106,10 @@ function UnloadImage(name)
 
 end
 
-AddEventHandler('imgloader:loadImage',   LoadImage)
+AddEventHandler('imgloader:loadImage', function(name, txd, imagename, cb)
+  cb(LoadImage(name, txd, imagename))
+end)
+
 AddEventHandler('imgloader:setImage',    SetImage)
 AddEventHandler('imgloader:unloadImage', UnloadImage)
 

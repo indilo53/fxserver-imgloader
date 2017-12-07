@@ -1,7 +1,7 @@
 AddEventHandler('imgloader:ready', function()
 
   Citizen.CreateThread(function()
-    
+
     RequestStreamedTextureDict('custom_imgs', true)
 
     while not HasStreamedTextureDictLoaded('custom_imgs') do
@@ -12,20 +12,21 @@ AddEventHandler('imgloader:ready', function()
 
       local playerPed = GetPlayerPed(-1)
       local coords    = GetEntityCoords(playerPed)
+      local camRot    = GetGameplayCamRot()
 
       for k,v in pairs(Config.Zones) do
 
         if GetDistanceBetweenCoords(coords, v.x, v.y, v.z, true) < Config.DrawDistance then
 
           LoadImage('zone_' .. k, v.txd, v.name)
-          
+
           SetImage('zone_' .. k, {
             x      = v.x,
             y      = v.y,
             z      = v.z,
             rotX   = -90.0,
             rotY   = 0.0,
-            rotZ   = 0.0,
+            rotZ   = camRot.z,
             scaleX = v.width,
             scaleY = v.height,
             scaleZ = 0.0,
@@ -48,7 +49,7 @@ AddEventHandler('imgloader:ready', function()
 
   end)
 
-  end)
+end)
 
 AddEventHandler('imgloader_example:hasEnteredMarker', function(zone)
   print('Entered ' .. zone)
