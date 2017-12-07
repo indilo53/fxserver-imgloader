@@ -1,4 +1,4 @@
---AddEventHandler('imgloader:ready', function()
+AddEventHandler('imgloader:ready', function()
 
   Citizen.CreateThread(function()
 
@@ -14,7 +14,7 @@
 
   end)
 
---end)
+end)
 
 
 for k,v in pairs(Config.Animations) do
