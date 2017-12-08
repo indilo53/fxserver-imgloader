@@ -26,8 +26,46 @@ You can test the example, it is a sample zone manager using imgloader.
 ### API
 
 ```
-LoadImage(name, textureDictionnaryName, imageName)
-UnloadImage(name)
-SetImage(name, key, val) or SetImage(name, {key1 = val1, key2 = val2,})
+local image = CreateImage({
+  txd    = 'texture_dictionnary',
+  name   = 'iamge_name',
+  x      = 0.0,
+  y      = 0.0,
+  z      = 0.0,
+  rotX   = 0.0,
+  rotY   = 0.0,
+  rotZ   = 0.0,
+  scaleX = 1.0,
+  scaleY = 0.5,
+  scaleZ = 0.0,
+  alpha  = 100.0,
+})
+
+image.set({
+  txd    = 'texture_dictionnary',
+  name   = 'iamge_name',
+  x      = 0.0,
+  y      = 0.0,
+  z      = 0.0,
+  rotX   = 0.0,
+  rotY   = 0.0,
+  rotZ   = 0.0,
+  scaleX = 1.0,
+  scaleY = 0.5,
+  scaleZ = 0.0,
+  alpha  = 100.0,
+})
+
+image.set('alpha', 100.0)
+
+image.show()
+
+image.hide()
+
+image.play(txd, prefix, length, delay)
+
+image.pause()
+
+image.unload()
 ```
 
