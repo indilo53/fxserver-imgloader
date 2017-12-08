@@ -4,17 +4,37 @@ local UsedScaleforms   = {}
 local ImageSrcs        = {}
 local DrawedImages     = {}
 
-function LoadImage(name, txd, imagename)
+local ImageId      = -1
+local ShowedImages = {}
 
-  local scaleform = nil
-  local id        = nil
+function CreateImage(params)
 
-  if DrawedImages[name] ~= nil then
+  local params = params or {}
+  local self   = {}
 
-    scaleform = DrawedImages[name].scaleform
-    id        = DrawedImages[name].scaleformId
- 
-  else
+  ImageId = ImageId + 1
+  
+  self.id         = ImageId
+  self.txd        = ''
+  self.name       = ''
+  self.lastSource = ''
+  self.x          = 0.0
+  self.y          = 0.0
+  self.z          = 0.0
+  self.rotX       = 0.0
+  self.rotY       = 0.0
+  self.rotZ       = 0.0
+  self.scaleX     = 1.0
+  self.scaleY     = 0.5
+  self.scaleZ     = 0.0
+  self.alpha      = 100.0
+  self.visible    = false
+
+  for k,v in pairs(params) do
+    self[k] = v
+  end
+
+  self.getFreeScaleform = function()
 
     for i=1, #Scaleforms, 1 do
 
@@ -28,83 +48,136 @@ function LoadImage(name, txd, imagename)
       end
 
       if not used then
-        scaleform = Scaleforms[i]
-        id        = i
         table.insert(UsedScaleforms, i)
-        break
+        return Scaleforms[i], i
       end
 
     end
 
   end
 
-  if scaleform == nil then
-    return false
+  self.freeScaleform = function(id)
+    for i=1, #UsedScaleforms, 1 do
+      if UsedScaleforms[i] ==id then
+        table.remove(UsedScaleforms, i)
+        break
+      end
+    end
   end
 
-  DrawedImages[name] = {
-    scaleformId = id,
-    scaleform   = scaleform,
-    txd         = txd,
-    name        = imagename,
-    x           = 0.0,
-    y           = 0.0,
-    z           = 0.0,
-    rotX        = 0.0,
-    rotY        = 0.0,
-    rotZ        = 0.0,
-    scaleX      = 1.0,
-    scaleY      = 0.5,
-    scaleZ      = 1.0,
-    alpha       = 100.0,
-  }
+  self.show = function()
+   
+    self.visible = true
 
-  return scaleform
+    if self.scaleform == nil then
+      
+      local scaleform, scaleformId = self.getFreeScaleform()
 
-end
+      self.scaleform   = scaleform
+      self.scaleformId = scaleformId
 
-function SetImage(name, key, val)
+      table.insert(ShowedImages, self)
+   
+    end
 
-  if DrawedImages[name] ~= nil then
+  end
+
+  self.hide = function()
+   
+    self.visible = false
+
+    if self.scaleform ~= nil then
+      
+      self.freeScaleform(self.scaleformId)
+
+      for i=1, #ShowedImages, 1 do
+        if ShowedImages[i] == self then
+          table.remove(ShowedImages, i)
+          break
+        end
+      end
+
+      self.scaleform   = nil
+      self.scaleformId = nil
+
+    end
+
+  end
+
+  self.setSource = function(txd, name)
+    self.txd  = txd
+    self.name = name
+  end
+
+  self.get = function(key)
+    return self[key]
+  end
+
+  self.set = function(key, val)
 
     if type(key) == 'table' then
-
       for k,v in pairs(key) do
-        DrawedImages[name][k] = v
+        self[k] = v
       end
-
     else
-      DrawedImages[name][key] = val
+      self[key] = val
     end
 
   end
 
-end
+  self.unload = function()
+    
+    self.hide()
 
-function UnloadImage(name)
+    for k, v in pairs(self) do
+      self[k] = nil
+    end
 
-  if DrawedImages[name] ~= nil then
+  end
 
-    for i=1, #UsedScaleforms, 1 do
-      if UsedScaleforms[i] == DrawedImages[name].scaleformId then
-        table.remove(UsedScaleforms, i)
-        DrawedImages[name] = nil
-        break
+  self.play = function(txd, prefix, length, delay)
+
+    if self.animating then
+      return
+    end
+
+    self.animating = true
+    local delay    = delay or 20
+
+    Citizen.CreateThread(function()
+
+      while true do
+
+        for i=0, length, 1 do
+
+          self.setSource(txd, prefix .. i)
+
+          Citizen.Wait(delay)
+
+          if not self.animating then
+            return
+          end
+
+        end
+
       end
-    end
+
+    end)
 
   end
 
+  self.pause = function()
+     self.animating = false
+  end
+
+  return self
+
 end
 
-AddEventHandler('imgloader:loadImage', function(name, txd, imagename, cb)
-  cb(LoadImage(name, txd, imagename))
+AddEventHandler('imgloader:createImage', function(params, cb)
+  cb(CreateImage(params))
 end)
 
-AddEventHandler('imgloader:setImage',    SetImage)
-AddEventHandler('imgloader:unloadImage', UnloadImage)
-
--- Load scaleforms
 Citizen.CreateThread(function()
 
   for i=1, MaxImages, 1 do
@@ -123,38 +196,36 @@ Citizen.CreateThread(function()
 
   while true do
 
-    for k,v in pairs(DrawedImages) do
+    for i=1, #ShowedImages, 1 do
 
-		  if ImageSrcs[k] ~= v.txd .. '/' .. v.name then
-		    
-		    PushScaleformMovieFunction(v.scaleform, 'LOAD_IMAGE')
-		    PushScaleformMovieFunctionParameterString(v.txd)
-		    PushScaleformMovieFunctionParameterString(v.name)
-		    PopScaleformMovieFunctionVoid()
+      if ShowedImages[i].lastSource ~= ShowedImages[i].txd .. '/' .. ShowedImages[i].name then
 
-		    ImageSrcs[k] = v.txd .. '/' .. v.name
-		  
-		  end
+        PushScaleformMovieFunction(ShowedImages[i].scaleform, 'LOAD_IMAGE')
+        PushScaleformMovieFunctionParameterString(ShowedImages[i].txd)
+        PushScaleformMovieFunctionParameterString(ShowedImages[i].name)
+        PopScaleformMovieFunctionVoid()
 
-      PushScaleformMovieFunction(v.scaleform, 'SET_ALPHA')
-      PushScaleformMovieFunctionParameterFloat(v.alpha)
+      end
+
+      PushScaleformMovieFunction(ShowedImages[i].scaleform, 'SET_ALPHA')
+      PushScaleformMovieFunctionParameterFloat(ShowedImages[i].alpha)
       PopScaleformMovieFunctionVoid()
 
       DrawScaleformMovie_3dNonAdditive(
-        v.scaleform,  -- scaleform
-        v.x,          -- posX
-        v.y,          -- posY
-        v.z,          -- posZ
-        v.rotX,       -- rotX
-        v.rotY,       -- rotY
-        v.rotZ,       -- rotZ
-        2.0,        -- p7
-        1.0,        -- sharpness
-        1.0,        -- p9
-        v.scaleX,     -- scaleX
-        v.scaleY,     -- scaleY
-        v.scaleZ,     -- scaleZ
-        0           -- p13
+        ShowedImages[i].scaleform,  -- scaleform
+        ShowedImages[i].x,          -- posX
+        ShowedImages[i].y,          -- posY
+        ShowedImages[i].z,          -- posZ
+        ShowedImages[i].rotX,       -- rotX
+        ShowedImages[i].rotY,       -- rotY
+        ShowedImages[i].rotZ,       -- rotZ
+        2.0,                        -- p7
+        1.0,                        -- sharpness
+        1.0,                        -- p9
+        ShowedImages[i].scaleX,     -- scaleX
+        ShowedImages[i].scaleY,     -- scaleY
+        ShowedImages[i].scaleZ,     -- scaleZ
+        0                           -- p13
       )
 
     end

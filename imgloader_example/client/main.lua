@@ -1,3 +1,5 @@
+local ZoneImages = {}
+
 AddEventHandler('imgloader:ready', function()
 
   Citizen.CreateThread(function()
@@ -6,6 +8,22 @@ AddEventHandler('imgloader:ready', function()
 
     while not HasStreamedTextureDictLoaded('custom_imgs') do
       Citizen.Wait(0)
+    end
+
+    for k,v in pairs(Config.Zones) do
+
+      ZoneImages[k] = CreateImage({
+        txd    = v.txd,
+        name   = v.name,
+        x      = v.x,
+        y      = v.y,
+        z      = v.z,
+        scaleX = v.width,
+        scaleY = v.height,
+        rotX   = -90.0,
+        rotY   = 0.0,
+      })
+
     end
 
     while true do
@@ -18,27 +36,19 @@ AddEventHandler('imgloader:ready', function()
 
         if GetDistanceBetweenCoords(coords, v.x, v.y, v.z, true) < Config.DrawDistance then
 
-          LoadImage('zone_' .. k, v.txd, v.name)
-
-          SetImage('zone_' .. k, {
-            x      = v.x,
-            y      = v.y,
-            z      = v.z,
-            rotX   = -90.0,
-            rotY   = 0.0,
-            rotZ   = camRot.z,
-            scaleX = v.width,
-            scaleY = v.height,
-            scaleZ = 0.0,
-            alpha  = 100.0,
+          ZoneImages[k].set({
+            rotZ  = camRot.z,
+            alpha = 100.0
           })
 
+          ZoneImages[k].show()
+
           if GetDistanceBetweenCoords(coords, v.x, v.y, v.z, true) <= v.size / 2 then
-            SetImage('zone_' .. k, 'alpha', 50.0)
+            ZoneImages[k].set('alpha', 50.0)
           end
 
         else
-          UnloadImage('zone_' .. k)
+          ZoneImages[k].hide()
         end
 
       end
