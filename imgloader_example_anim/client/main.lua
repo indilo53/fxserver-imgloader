@@ -25,17 +25,26 @@ AddEventHandler('imgloader:ready', function()
       })
 
       AnimatedImages[k].play(v.txd, v.prefix, v.length)
-
-      AnimatedImages[k].show()
     
     end
 
     while true do
 
-      local camRot = GetGameplayCamRot()
+      local playerPed = GetPlayerPed(-1)
+      local coords    = GetEntityCoords(playerPed)
+      local camRot    = GetGameplayCamRot()
 
       for k,v in pairs(Config.Animations) do
-        AnimatedImages[k].set('rotZ', camRot.z)
+        
+        local distance  = GetDistanceBetweenCoords(v.x, v.y, v.z, coords.x, coords.y, coords.z, true)
+
+        if distance < Config.DrawDistance then
+          AnimatedImages[k].set('rotZ', camRot.z)
+          AnimatedImages[k].show()
+        else
+          AnimatedImages[k].hide()
+        end
+
       end
 
       Citizen.Wait(0)
