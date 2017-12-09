@@ -1,11 +1,7 @@
-local MaxImages        = 20
-local Scaleforms       = {}
-local UsedScaleforms   = {}
-local ImageSrcs        = {}
-local DrawedImages     = {}
-
-local ImageId      = -1
-local ShowedImages = {}
+local ImageId        = -1
+local ShowedImages   = {}
+local Scaleforms     = {}
+local UsedScaleforms = {}
 
 function CreateImage(params)
 
@@ -180,7 +176,7 @@ end)
 
 Citizen.CreateThread(function()
 
-  for i=1, MaxImages, 1 do
+  for i=1, Config.MaxImages, 1 do
    
     Scaleforms[i] = RequestScaleformMovie('imgloader_' .. i)
 
