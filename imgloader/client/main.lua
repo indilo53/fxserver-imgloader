@@ -131,7 +131,11 @@ function CreateImage(params)
 
   end
 
-  self.play = function(txd, prefix, length, delay)
+  self.play = function(txd, prefix, length, delay, timeBeforeReplay)
+
+    if(timeBeforeReplay==nil) then
+      timeBeforeReplay = 0
+    end
 
     if self.animating then
       return
@@ -155,6 +159,8 @@ function CreateImage(params)
           end
 
         end
+
+        Citizen.Wait(timeBeforeReplay)
 
       end
 
