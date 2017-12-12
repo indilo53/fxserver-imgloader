@@ -133,16 +133,13 @@ function CreateImage(params)
 
   self.play = function(txd, prefix, length, delay, timeBeforeReplay)
 
-    if(timeBeforeReplay==nil) then
-      timeBeforeReplay = 0
-    end
-
     if self.animating then
       return
     end
 
-    self.animating = true
-    local delay    = delay or 20
+    self.animating         = true
+    local delay            = delay            or 20
+    local timeBeforeReplay = timeBeforeReplay or 0
 
     Citizen.CreateThread(function()
 
