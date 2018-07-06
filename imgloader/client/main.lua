@@ -10,21 +10,22 @@ function CreateImage(params)
 
   ImageId = ImageId + 1
   
-  self.id         = ImageId
-  self.txd        = ''
-  self.name       = ''
-  self.lastSource = ''
-  self.x          = 0.0
-  self.y          = 0.0
-  self.z          = 0.0
-  self.rotX       = 0.0
-  self.rotY       = 0.0
-  self.rotZ       = 0.0
-  self.scaleX     = 1.0
-  self.scaleY     = 0.5
-  self.scaleZ     = 0.0
-  self.alpha      = 100.0
-  self.visible    = false
+  self.id            = ImageId
+  self.txd           = ''
+  self.name          = ''
+  self.lastSource    = ''
+  self.x             = 0.0
+  self.y             = 0.0
+  self.z             = 0.0
+  self.rotX          = 0.0
+  self.rotY          = 0.0
+  self.rotZ          = 0.0
+  self.scaleX        = 1.0
+  self.scaleY        = 0.5
+  self.scaleZ        = 0.0
+  self.alpha         = 100.0
+  self.visible       = false
+  self.waitForUpdate = false
 
   for k,v in pairs(params) do
     self[k] = v
@@ -166,7 +167,11 @@ function CreateImage(params)
   end
 
   self.pause = function()
-     self.animating = false
+    self.animating = false
+  end
+
+  self.update = function()
+    self.waitForUpdate = true
   end
 
   return self
@@ -197,7 +202,9 @@ Citizen.CreateThread(function()
 
     for i=1, #ShowedImages, 1 do
 
-      if ShowedImages[i].lastSource ~= ShowedImages[i].txd .. '/' .. ShowedImages[i].name then
+      if ShowedImages[i].waitForUpdate or(ShowedImages[i].lastSource ~= ShowedImages[i].txd .. '/' .. ShowedImages[i].name) then
+
+        ShowedImages[i].waitForUpdate = false
 
         PushScaleformMovieFunction(ShowedImages[i].scaleform, 'LOAD_IMAGE')
         PushScaleformMovieFunctionParameterString(ShowedImages[i].txd)
